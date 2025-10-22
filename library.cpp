@@ -1,9 +1,11 @@
+
 #include <iostream>
 #include <limits>
 #include <exception>
 #include <unordered_map>
 #include <string>
 #include <ctime>
+
 using namespace std;
 
 class Books {
@@ -25,6 +27,7 @@ protected:
     unordered_map<string, Book> selfhelp_books;
 
 public:
+    // Constructor: populates the in-memory book collections.
     Books() {
         Assign_Business_Books();
         Assign_Investment_Books();
@@ -33,6 +36,9 @@ public:
         Assign_SelfHelp_Books();
     }
 
+    // Populate the business_books map with sample data.
+    // Each entry is keyed by ISBN and contains basic bibliographic data
+    // along with the number of copies available.
     void Assign_Business_Books() {
         business_books["9780062316110"] = {"9780062316110", "Start With Why", "Simon Sinek", "Portfolio", "Business", 2009, 10};
         business_books["9780066620992"] = {"9780066620992", "Good to Great", "Jim Collins", "HarperBusiness", "Business", 2001, 12};
@@ -46,6 +52,7 @@ public:
         business_books["9781591848289"] = {"9781591848289", "Radical Candor", "Kim Scott", "St. Martin's Press", "Business", 2017, 9};
     }
 
+    // Populate investment_books with sample investment-related titles.
     void Assign_Investment_Books() {
         investment_books["9780060555665"] = {"9780060555665", "The Intelligent Investor", "Benjamin Graham", "HarperBusiness", "Investment", 2006, 12};
         investment_books["9780471119272"] = {"9780471119272", "Security Analysis", "Benjamin Graham & David Dodd", "McGraw-Hill", "Investment", 2008, 10};
@@ -59,6 +66,7 @@ public:
         investment_books["9780452285472"] = {"9780452285472", "The Millionaire Next Door", "Thomas J. Stanley & William D. Danko", "Taylor Trade Publishing", "Investment", 1996, 11};
     }
 
+    // Populate accounting_books with sample accounting textbooks.
     void Assign_Accounting_Books() {
         accounting_books["9781118951747"] = {"9781118951747", "Financial Accounting", "Robert Libby", "McGraw-Hill", "Accounting", 2018, 12};
         accounting_books["9781260266153"] = {"9781260266153", "Intermediate Accounting", "Donald E. Kieso", "Wiley", "Accounting", 2019, 10};
@@ -73,6 +81,7 @@ public:
 
     }
 
+    // Populate wealth_books with personal finance / wealth-building titles.
     void Assign_Wealth_Books() {
         wealth_books["9781612680194"] = {"9781612680194", "Rich Dad Poor Dad", "Robert Kiyosaki", "Plata Publishing", "Money", 2017, 15};
         wealth_books["9781533667922"] = {"9781533667922", "The Simple Path to Wealth", "JL Collins", "CreateSpace Independent Publishing Platform", "Money", 2016, 12};
@@ -86,6 +95,7 @@ public:
         wealth_books["9780735211292"] = {"9780735211292", "Financial Freedom", "Grant Sabatier", "Penguin Life", "Money", 2019, 7};
     }
 
+    // Populate selfhelp_books with self-improvement titles.
     void Assign_SelfHelp_Books() {
         selfhelp_books["9780143127741"] = {"9780143127741", "Atomic Habits", "James Clear", "Avery", "Self-Help", 2018, 15};
         selfhelp_books["9781594634024"] = {"9781594634024", "The Power of Now", "Eckhart Tolle", "New World Library", "Self-Help", 1997, 10};
@@ -101,14 +111,32 @@ public:
 
 };
 
+/**
+ * Access_Books
+ *
+ * Derived helper class that provides read-only access to the book
+ * collections defined in Books. Responsible for searching and presenting
+ * books to the user.
+ */
 class Access_Books : protected Books
 {
     private:
     int choice;
     protected:
 
+    /**
+     * Fetch_By_ISBN
+     *
+     * Search all book categories for the provided ISBN and return a pair
+     * of {title, author} when found. If the ISBN is not present, returns
+     * {"Book not found", "Unknown"}.
+     *
+     * Parameters:
+     *  - ISBN: lookup key for books stored in the maps.
+     */
     pair<string, string> Fetch_By_ISBN(const string &ISBN)
     {
+        // Search each category for the ISBN and return title+author when found.
         if (business_books.find(ISBN) != business_books.end())
             return {business_books[ISBN].title, business_books[ISBN].author};
         if (investment_books.find(ISBN) != investment_books.end())
@@ -120,11 +148,20 @@ class Access_Books : protected Books
         if (selfhelp_books.find(ISBN) != selfhelp_books.end())
             return {selfhelp_books[ISBN].title, selfhelp_books[ISBN].author};
 
+        // If the ISBN is not present in any collection, return a sentinel value.
         return {"Book not found", "Unknown"};
     }
 
+    /**
+     * Fetch_Business_Books
+     *
+     * Print a formatted listing of all books in the "Business" category
+     * to stdout and wait for the user to confirm (enter 0) before
+     * returning to the caller.
+     */
     void Fetch_Business_Books()
     {
+        // Display header and list all books in the Business category.
         cout<< "==================\n";
         cout<< "Business Books" << endl;
         cout<< "==================\n";
@@ -140,6 +177,8 @@ class Access_Books : protected Books
             cout << "Copies: " << b.copies << "\n";
             cout << endl;
         }
+
+        // Wait for the user to confirm before returning to the previous menu.
         while (true)
         {
             try
@@ -159,8 +198,15 @@ class Access_Books : protected Books
             }
         }
     }
+    /**
+     * Fetch_Investment_Books
+     *
+     * Print a formatted listing of all investment-related books and wait
+     * for the user to acknowledge before returning.
+     */
     void Fetch_Investment_Books()
     {
+        // Display investment category books and wait for user confirmation.
         cout<< "==================\n";
         cout << "Investment Books" << endl;
         cout<< "==================\n";
@@ -195,8 +241,15 @@ class Access_Books : protected Books
             }
         }
     }
+    /**
+     * Fetch_Accounting_Books
+     *
+     * Display accounting textbooks currently stored in the in-memory
+     * collection.
+     */
     void Fetch_Accounting_Books()
     {
+        // Display accounting books.
         cout<< "==================\n";
         cout << "Accounting Books" << endl;
         cout<< "==================\n";
@@ -231,8 +284,14 @@ class Access_Books : protected Books
             }
         }
     }
+    /**
+     * Fetch_Wealth_Books
+     *
+     * Display titles related to personal finance and wealth management.
+     */
     void Fetch_Wealth_Books()
     {
+        // Display wealth/personal finance books and wait for confirmation.
         cout<< "==================\n";
         cout << "Wealth Books" << endl;
         cout<< "==================\n";
@@ -267,8 +326,14 @@ class Access_Books : protected Books
             }
         }
     }
+    /**
+     * Fetch_Selfhelp_Books
+     *
+     * Display self-help and personal development titles.
+     */
     void Fetch_Selfhelp_Books()
     {
+        // Display self-help titles.
         cout<< "==================\n";
         cout << "SelfHelp_books" << endl;
         cout<< "==================\n";
@@ -330,11 +395,15 @@ protected:
 
 public:
     Student_Credentials() {
+        // Initialize in-memory user records.
         Initialize_Users();
     }
 
     void Initialize_Users()
     {
+        // Populate several example student accounts. Passwords and data are
+        // hardcoded for demo/testing purposes only. Do not use this approach
+        // in production code.
         stud_cred["A86605224001"] = {"A86605224001", "P@ssW0rd123!", "Ananya Singh", "ananya.s@s.amity.edu", "B.Tech", "CSE", "Software Engineering", "First", "9780062316110", "2025-10-01", "2025-10-15", 0.0};
         stud_cred["A86605224002"] = {"A86605224002", "T3ch!Guru#456", "Rahul Verma", "rahul.v@s.amity.edu", "B.Tech", "EE", "Embedded Systems", "Second", "9780060555665", "2025-10-02", "2025-10-16", 0.0};
         stud_cred["A86605224003"] = {"A86605224003", "M@thM!nd789", "Sneha Kapoor", "sneha.k@s.amity.edu", "B.Sc", "Mathematics", "Statistical Modelling", "Third", "9781118807276", "2025-10-03", "2025-10-17", 0.0};
@@ -391,6 +460,7 @@ class Student_Login : protected Student_Credentials, protected Access_Books {
                 cout << "Incorrect Password! Please Enter a Valid Password.\n";
             }
         }
+        // Update fines based on current date then open the student account menu.
         Update_Student_Fine();
         Student_Acc();
     }
@@ -403,6 +473,8 @@ class Student_Login : protected Student_Credentials, protected Access_Books {
         for (auto &pair : stud_cred) {
             Students &s = pair.second;
 
+            // If the student does not currently have a borrowed book,
+            // ensure their fine is zero and skip further processing.
             if (s.borrowed_book_ISBN.empty()) {
                 s.fine = 0.0;
                 continue;
@@ -414,7 +486,8 @@ class Student_Login : protected Student_Credentials, protected Access_Books {
             due.tm_mon  = stoi(s.due_date.substr(5,2)) - 1;
             due.tm_mday = stoi(s.due_date.substr(8,2));
 
-            // Calculate difference in days
+            // Calculate difference between now and the due date in days.
+            // If overdue, charge a fixed rate per day (20.0 units/day).
             time_t due_time = mktime(&due);
             double diff = difftime(now, due_time);
             int overdue_days = diff > 0 ? diff / (60*60*24) : 0;
@@ -461,6 +534,8 @@ class Student_Login : protected Student_Credentials, protected Access_Books {
         cout << "==================\n";
         cout << "MY BORROWINGS\n";
         cout << "==================\n";
+        // Retrieve book metadata (title & author) for the currently
+        // borrowed ISBN, if any.
         auto info = Fetch_By_ISBN(stud_cred[user_id].borrowed_book_ISBN);
         if (info.first != "Book not found")
         {
@@ -501,6 +576,8 @@ class Student_Login : protected Student_Credentials, protected Access_Books {
         cout << "VIEW BOOKS\n";
         cout << "==================\n";
         cout << "1. Business Books\n" << "2. Investment Books\n" << "3. Accounting Books\n" << "4. Wealth Books\n" << "5. SelfHelp Books\n" << "6. Exit\n";
+        // Prompt loop: display categories and call the appropriate
+        // display function. Uses goto to reprint the menu after returning.
         while (true)
         {
             try
@@ -682,9 +759,11 @@ class Login_Portal : Student_Login {
 };
 
 int main() {
-    Student_Credentials student_credentials;
-    Student_Login student_login;
-    Login_Portal login_portal;
-    login_portal.Get_Choice();
+    // Entry point: construct objects to ensure data initialization and
+    // then launch the login portal UI loop.
+    Student_Credentials student_credentials; // ensures user data is loaded
+    Student_Login student_login;             // user login helper
+    Login_Portal login_portal;               // top-level menu
+    login_portal.Get_Choice();               // start interactive prompt
     return 0;
 }
