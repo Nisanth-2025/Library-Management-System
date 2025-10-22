@@ -42,18 +42,18 @@ jobs:
       if: matrix.compiler == 'gcc'
       run: |
         g++ --version
-        g++ -std=c++11 -Wall -Wextra -O2 -o library_system main.cpp
+        g++ -std=c++14 -Wall -Wextra -O2 -o library_system main.cpp
 
     - name: Build with Clang
       if: matrix.compiler == 'clang'
       run: |
         clang++ --version
-        clang++ -std=c++11 -Wall -Wextra -O2 -o library_system main.cpp
+        clang++ -std=c++14 -Wall -Wextra -O2 -o library_system main.cpp
 
     - name: Build with MSVC
       if: matrix.compiler == 'msvc'
       run: |
-        cl /std:c++11 /W4 /EHsc /O2 /Fe:library_system.exe main.cpp
+        cl /std:c++14 /W4 /EHsc /O2 /Fe:library_system.exe main.cpp
 
     - name: Test Compilation Success
       run: |

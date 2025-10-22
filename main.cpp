@@ -2,6 +2,8 @@
 #include <limits>
 #include <exception>
 #include <unordered_map>
+#include <string>
+#include <ctime>
 using namespace std;
 
 class Books {
@@ -149,7 +151,7 @@ class Access_Books : protected Books
                     break;
                 }
             }
-            catch (ios_base::failure &e)
+            catch (ios_base::failure &)
             {
                 cout << "Invalid input! Please enter numbers only.\n";
                 cin.clear();
@@ -423,7 +425,7 @@ class Student_Login : protected Student_Credentials, protected Access_Books {
 
     void Account_Details()
     {
-        int choice;
+        int local_choice;
         cout << "==================\n";
         cout << "ACCOUNT DETAILS\n";
         cout << "==================\n";
@@ -439,8 +441,8 @@ class Student_Login : protected Student_Credentials, protected Access_Books {
             try
             {
                 cout << "Enter 0 to go Back : ";
-                cin >> choice;
-                if (choice == 0)
+                cin >> local_choice;
+                if (local_choice == 0)
                 {
                     break;
                 }
