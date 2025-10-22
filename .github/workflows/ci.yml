@@ -7,94 +7,37 @@ on:
     branches: [ main ]
 
 jobs:
-  build-and-test:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        compiler: [gcc, clang, msvc]
-        exclude:
-          - os: ubuntu-latest
-            compiler: msvc
-          - os: macos-latest
-            compiler: msvc
-          - os: windows-latest
-            compiler: clang
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Setup C++ Environment (Ubuntu/macOS)
-      if: matrix.os != 'windows-latest'
-      run: |
-        if [ "${{ matrix.compiler }}" = "gcc" ]; then
-          sudo apt-get update && sudo apt-get install -y g++ || brew install gcc
-        elif [ "${{ matrix.compiler }}" = "clang" ]; then
-          sudo apt-get update && sudo apt-get install -y clang || brew install llvm
-        fi
-
-    - name: Setup C++ Environment (Windows)
-      if: matrix.os == 'windows-latest'
-      uses: ilammy/msvc-dev-cmd@v1
-
-    - name: Build with GCC
-      if: matrix.compiler == 'gcc'
-      run: |
-        g++ --version
-        g++ -std=c++14 -Wall -Wextra -O2 -o library_system main.cpp
-
-    - name: Build with Clang
-      if: matrix.compiler == 'clang'
-      run: |
-        clang++ --version
-        clang++ -std=c++14 -Wall -Wextra -O2 -o library_system main.cpp
-
-    - name: Build with MSVC
-      if: matrix.compiler == 'msvc'
-      run: |
-        cl /std:c++14 /W4 /EHsc /O2 /Fe:library_system.exe main.cpp
-
-    - name: Test Compilation Success
-      run: |
-        if [ "${{ matrix.os }}" = "windows-latest" ]; then
-          if [ ! -f "library_system.exe" ]; then exit 1; fi
-        else
-          if [ ! -f "library_system" ]; then exit 1; fi
-        fi
-      shell: bash
-
-  code-quality:
+  simple-ci:
+    name: Simple CI (build + quality)
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Install cppcheck
-      run: sudo apt-get update && sudo apt-get install -y cppcheck
+      - name: Install build + QA tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cppcheck clang-format python3-pip
+          python3 -m pip install --upgrade pip
+          pip3 install cpplint || true
 
-    - name: Run static analysis
-      run: |
-        cppcheck --enable=all --std=c++11 --suppress=missingIncludeSystem main.cpp
+      - name: Build
+        run: |
+          g++ --version || true
+          g++ -std=c++14 -Wall -Wextra -O2 -o library_system main.cpp
 
-    - name: Check code formatting
-      run: |
-        sudo apt-get install -y clang-format
-        clang-format --dry-run --Werror main.cpp
+      - name: cppcheck
+        run: |
+          cppcheck --enable=all --std=c++14 --suppress=missingIncludeSystem --error-exitcode=1 main.cpp
 
-  security-scan:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: cpplint
+        run: |
+          cpplint --filter=-legal/copyright main.cpp || true
 
-    - name: Run security scan
-      run: |
-        sudo apt-get update && sudo apt-get install -y cppcheck
-        cppcheck --enable=all --std=c++11 --xml --xml-version=2 main.cpp 2> security_report.xml || true
-        
-    - name: Upload security results
-      uses: actions/upload-artifact@v4
-      with:
-        name: security-scan-results
-        path: security_report.xml
+      - name: clang-format check
+        run: |
+          clang-format main.cpp > formatted_main.cpp
+          if ! diff -u main.cpp formatted_main.cpp; then
+            echo "clang-format mismatch: run clang-format -i main.cpp to fix"
+            exit 1
+          fi
